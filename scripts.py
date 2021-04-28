@@ -1,18 +1,18 @@
+import argparse
 import django
 import os
 import random
 
-
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 django.setup()
 
-
+from datacenter.models import Chastisement
 from datacenter.models import Commendation
 from datacenter.models import Lesson
+from datacenter.models import Mark
 from datacenter.models import Schoolkid
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
-
 
 PUPILS_NAME = 'Сергей'
 STUDY_SUBJECT = 'Музыка'
@@ -65,6 +65,20 @@ def create_commendation(schoolkid_name, subject):
                                 created=pick_lesson.date, schoolkid=schoolkid,
                                 subject=pick_lesson.subject,
                                 teacher=pick_lesson.teacher)
+
+
+def fix_marks(schoolkid_name):
+    schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name)
+    bad_points = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
+    for bad_point in bad_points:
+        bad_point.points = 5
+        bad_point.save()
+
+
+def remove_chastisements(schoolkid_name):
+    schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name)
+    pupil_chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
+    pupil_chastisements.delete()
 
 
 def main():
