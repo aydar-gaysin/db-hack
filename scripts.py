@@ -38,30 +38,38 @@ def create_commendation(schoolkid_name, subject):
         'Ты многое сделал, я это вижу!'
     ]
     commendation = random.choice(commendations)
-    schoolkid_queryset = Schoolkid.objects.filter(full_name__contains=schoolkid_name)
+    schoolkid_queryset = Schoolkid.objects.filter\
+        (full_name__contains=schoolkid_name)
     try:
         schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
     except MultipleObjectsReturned:
-        print(f'Нашел учеников с именем {schoolkid_name}: {len(schoolkid_queryset)}. Не могу продолжить выполнение'
+        print(f'Нашел учеников с именем {schoolkid_name}: '
+              f'{len(schoolkid_queryset)}. Не могу продолжить выполнение'
               f'сценария.')
         return
     except ObjectDoesNotExist:
-        print(f'Не нашел учеников с именем {schoolkid_name}. Не могу продолжить выполнение сценария.')
+        print(f'Не нашел учеников с именем {schoolkid_name}. '
+              f'Не могу продолжить выполнение сценария.')
         return
     print(schoolkid)
-    subject_lessons = Lesson.objects.filter(year_of_study=schoolkid.year_of_study, group_letter=schoolkid.group_letter,
-                                        subject__title=subject)
+    subject_lessons = Lesson.objects.filter(
+        year_of_study=schoolkid.year_of_study,
+        group_letter=schoolkid.group_letter, subject__title=subject)
     lessons_quantity = len(subject_lessons)
-    pick_lesson = Lesson.objects.filter(year_of_study=schoolkid.year_of_study, group_letter=schoolkid.group_letter,
-                                        subject__title=subject)[random.randint(0, lessons_quantity)]
+    pick_lesson = Lesson.objects.filter(
+        year_of_study=schoolkid.year_of_study,
+        group_letter=schoolkid.group_letter,
+        subject__title=subject)[random.randint(0, lessons_quantity)]
     print(pick_lesson.date)
-    Commendation.objects.create(text=commendation, created=pick_lesson.date, schoolkid=schoolkid,
-                                subject=pick_lesson.subject, teacher=pick_lesson.teacher)
+    Commendation.objects.create(text=commendation,
+                                created=pick_lesson.date, schoolkid=schoolkid,
+                                subject=pick_lesson.subject,
+                                teacher=pick_lesson.teacher)
 
 
 def main():
     return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
