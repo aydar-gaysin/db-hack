@@ -15,20 +15,24 @@ from datacenter.models import Schoolkid
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
-PUPILS_NAME = 'Анна'
-#PUPILS_NAME = 'Фролов Иван'
+#PUPILS_NAME = 'Анна'
+PUPILS_NAME = 'Фролов Иван'
 STUDY_SUBJECT = 'Литература'
 
 
 def school_kid_search(schoolkid_name):
-    schoolkid_queryset = Schoolkid.objects.filter \
-        (full_name__contains=schoolkid_name)
+    if not schoolkid_name:
+        logging.info(f'Ошибка! Не введено имя ученика. Запустите программу'
+                     f'повторно, указав уникальное имя ученика.')
+        return
     try:
         schoolkid = Schoolkid.objects.get \
             (full_name__contains=schoolkid_name)
     except MultipleObjectsReturned:
+        schoolkid_queryset = Schoolkid.objects.filter \
+            (full_name__contains=schoolkid_name)
         logging.info(f'Нашел учеников с именем {schoolkid_name}: '
-                     f'{len(schoolkid_queryset)}. Запустите программу '
+                     f'{len(schoolkid_queryset)}.\nЗапустите программу '
                      f'повторно, указав уникальное имя ученика.')
         return
     except ObjectDoesNotExist:
@@ -36,9 +40,26 @@ def school_kid_search(schoolkid_name):
                      f'Запустите программу повторно, указав корректное имя '
                      f'ученика.')
         return
-    print(schoolkid)
     return schoolkid
 
+
+def study_subject_search(schoolkid, subject):
+    if not schoolkid:
+        logging.info(f'Не могу найти предмет, не зная точного имени ученика!')
+        return
+    try:
+        subject_lessons = Lesson.objects.get(
+            year_of_study=schoolkid.year_of_study,
+            group_letter=schoolkid.group_letter, subject__title=subject)
+        print(subject)
+    except MultipleObjectsReturned:
+        logging.debug(f'Предмет "{subject}" найден в базе.')
+    except ObjectDoesNotExist:
+        logging.info(f'Не нашел предмет с названием "{subject}". '
+                     f'Запустите программу повторно, указав корректное '
+                     f'название предмета.')
+        return
+    #return subject
 
 def create_commendation(schoolkid, subject):
     commendations = [
@@ -94,7 +115,14 @@ def remove_chastisements(schoolkid_name):
 
 def main():
     logging.basicConfig(format='{message}', level=logging.INFO, style='{')
-    return school_kid_search(PUPILS_NAME)
+    parser = argparse.ArgumentParser(description='Videos to images')
+    parser.add_argument('schoolchild_name', type=str, help='Pupil\'s surname'
+                                                           ' and name')
+    parser.add_argument('study_subject', type=str, help='Subject name')
+    args = parser.parse_args()
+    print(args.schoolchild_name)
+    # return school_kid_search(PUPILS_NAME)
+    print(study_subject_search(school_kid_search(PUPILS_NAME), STUDY_SUBJECT))
     # return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
 
 
