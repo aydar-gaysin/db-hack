@@ -16,7 +16,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
 #PUPILS_NAME = 'Анна'
-PUPILS_NAME = 'Фролов Иван'
+PUPILS_NAME = 'Костина Нина Романовна'
 STUDY_SUBJECT = 'Литература'
 
 
@@ -61,6 +61,7 @@ def study_subject_search(schoolkid, subject):
         return
     #return subject
 
+
 def create_commendation(schoolkid, subject):
     commendations = [
         'Молодец!',
@@ -100,11 +101,16 @@ def create_commendation(schoolkid, subject):
 
 
 def fix_marks(schoolkid_name):
-    schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name)
+    schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
     bad_points = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
+    bad_points_quantity = bad_points.count()
+    logging.info(f'Найдено {bad_points_quantity} плохих оценок.')
+    if not bad_points_quantity:
+        return
     for bad_point in bad_points:
         bad_point.points = 5
         bad_point.save()
+    logging.info(f'Все плохие оценки исправлены.')
 
 
 def remove_chastisements(schoolkid_name):
@@ -115,15 +121,16 @@ def remove_chastisements(schoolkid_name):
 
 def main():
     logging.basicConfig(format='{message}', level=logging.INFO, style='{')
-    parser = argparse.ArgumentParser(description='Videos to images')
-    parser.add_argument('schoolchild_name', type=str, help='Pupil\'s surname'
-                                                           ' and name')
-    parser.add_argument('study_subject', type=str, help='Subject name')
-    args = parser.parse_args()
-    print(args.schoolchild_name)
+    # parser = argparse.ArgumentParser(description='Videos to images')
+    # parser.add_argument('schoolchild_name', type=str, help='Pupil\'s surname'
+    #                                                        ' and name')
+    # parser.add_argument('study_subject', type=str, help='Subject name')
+    # args = parser.parse_args()
+    #print(args.schoolchild_name)
     # return school_kid_search(PUPILS_NAME)
-    print(study_subject_search(school_kid_search(PUPILS_NAME), STUDY_SUBJECT))
+    #print(study_subject_search(school_kid_search(PUPILS_NAME), STUDY_SUBJECT))
     # return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
+    fix_marks(PUPILS_NAME)
 
 
 if __name__ == '__main__':
