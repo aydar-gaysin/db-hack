@@ -15,8 +15,8 @@ from datacenter.models import Schoolkid
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
-#PUPILS_NAME = 'Анна'
-PUPILS_NAME = 'Костина Нина Романовна'
+
+PUPILS_NAME = 'Нина Костина'
 STUDY_SUBJECT = 'Литература'
 
 
@@ -34,12 +34,12 @@ def school_kid_search(schoolkid_name):
         logging.info(f'Нашел учеников с именем {schoolkid_name}: '
                      f'{len(schoolkid_queryset)}.\nЗапустите программу '
                      f'повторно, указав уникальное имя ученика.')
-        return
+        return None
     except ObjectDoesNotExist:
         logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
                      f'Запустите программу повторно, указав корректное имя '
                      f'ученика.')
-        return
+        return None
     return schoolkid
 
 
@@ -51,7 +51,6 @@ def study_subject_search(schoolkid, subject):
         subject_lessons = Lesson.objects.get(
             year_of_study=schoolkid.year_of_study,
             group_letter=schoolkid.group_letter, subject__title=subject)
-        print(subject)
     except MultipleObjectsReturned:
         logging.debug(f'Предмет "{subject}" найден в базе.')
     except ObjectDoesNotExist:
@@ -59,7 +58,7 @@ def study_subject_search(schoolkid, subject):
                      f'Запустите программу повторно, указав корректное '
                      f'название предмета.')
         return
-    #return subject
+    return subject
 
 
 def create_commendation(schoolkid, subject):
@@ -114,23 +113,65 @@ def fix_marks(schoolkid_name):
 
 
 def remove_chastisements(schoolkid_name):
-    schoolkid = Schoolkid.objects.filter(full_name__contains=schoolkid_name)
+    schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
     pupil_chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
     pupil_chastisements.delete()
+    logging.info(f'Все замечания для {schoolkid} успешно удалены.')
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(description='Скрипт работает с '
+                                                 'базой электронного '
+                                                 'дневника. При '
+                                                 'указании фамилии и '
+                                                 'имени ученика:\n'
+                                                 '1) меняет оценки "2" и "3"'
+                                                 'на "5";\n 2) удаляет '
+                                                 'замечания к ученику.\n При'
+                                                 'указании названия предмета '
+                                                 '(опционально), добавляет '
+                                                 'похвалу ученика, выбрав '
+                                                 'дату урока случайным '
+                                                 'образом.')
+
+    parser.add_argument('pupil_surname',
+                        type=str, help='Укажите фамилию ученика на '
+                                       'кириллице')
+    parser.add_argument('pupil_name',
+                        type=str, help='Укажите фамилию ученика на '
+                                       'кириллице')
+    parser.add_argument('-p', '--pupil_patronymic',
+                        type=str, help='Укажите отчество ученика на '
+                                       'кириллице')
+    parser.add_argument('-s', '--subject',
+                        type=str, help='Укажите название школьного предмета '
+                                       'на кириллице')
+    return parser
 
 
 def main():
     logging.basicConfig(format='{message}', level=logging.INFO, style='{')
-    # parser = argparse.ArgumentParser(description='Videos to images')
-    # parser.add_argument('schoolchild_name', type=str, help='Pupil\'s surname'
-    #                                                        ' and name')
-    # parser.add_argument('study_subject', type=str, help='Subject name')
-    # args = parser.parse_args()
-    #print(args.schoolchild_name)
-    # return school_kid_search(PUPILS_NAME)
-    #print(study_subject_search(school_kid_search(PUPILS_NAME), STUDY_SUBJECT))
-    # return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
-    fix_marks(PUPILS_NAME)
+    parser = create_parser()
+    args = parser.parse_args()
+    schoolkid_surname = args.pupil_surname
+    schoolkid_name = args.pupil_name
+    schoolkid_patronymic = args.pupil_patronymic
+
+    if not schoolkid_patronymic:
+        schoolkid_patronymic = ''
+    fullname = f'{schoolkid_surname} {schoolkid_name} {schoolkid_patronymic}'
+    schoolkid = school_kid_search(fullname)
+    print('------------------------------------------------------------------')
+    if schoolkid:
+        fix_marks(schoolkid.full_name)
+        remove_chastisements(schoolkid.full_name)
+
+    if args.subject:
+        subject = args.subject
+        study_subject = study_subject_search(schoolkid, subject)
+        if study_subject:
+            create_commendation(schoolkid, study_subject)
+    print('------------------------------------------------------------------')
 
 
 if __name__ == '__main__':
