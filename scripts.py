@@ -1,5 +1,6 @@
 import argparse
 import django
+import logging
 import os
 import random
 
@@ -14,8 +15,9 @@ from datacenter.models import Schoolkid
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
-PUPILS_NAME = 'Сергей'
-STUDY_SUBJECT = 'Музыка'
+
+PUPILS_NAME = 'Фролов Иван'
+STUDY_SUBJECT = 'Литература'
 
 
 def create_commendation(schoolkid_name, subject):
@@ -43,15 +45,14 @@ def create_commendation(schoolkid_name, subject):
     try:
         schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
     except MultipleObjectsReturned:
-        print(f'Нашел учеников с именем {schoolkid_name}: '
-              f'{len(schoolkid_queryset)}. Не могу продолжить выполнение'
-              f'сценария.')
+        logging.info(f'Нашел учеников с именем {schoolkid_name}: '
+              f'{len(schoolkid_queryset)}. Нужно указать уникальное имя '
+                     f'ученика для выполнения сценария.')
         return
     except ObjectDoesNotExist:
-        print(f'Не нашел учеников с именем {schoolkid_name}. '
+        logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
               f'Не могу продолжить выполнение сценария.')
         return
-    print(schoolkid)
     subject_lessons = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter, subject__title=subject)
@@ -60,11 +61,13 @@ def create_commendation(schoolkid_name, subject):
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
         subject__title=subject)[random.randint(0, lessons_quantity)]
-    print(pick_lesson.date)
     Commendation.objects.create(text=commendation,
                                 created=pick_lesson.date, schoolkid=schoolkid,
                                 subject=pick_lesson.subject,
                                 teacher=pick_lesson.teacher)
+    logging.info(f'Ученику {schoolkid} на уроке "{pick_lesson.subject}" '
+                 f'{pick_lesson.date} успешно добавлена похвала: '
+                 f'"{commendation}".')
 
 
 def fix_marks(schoolkid_name):
@@ -82,6 +85,7 @@ def remove_chastisements(schoolkid_name):
 
 
 def main():
+    logging.basicConfig(format='{message}', level=logging.INFO, style='{')
     return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
 
 
