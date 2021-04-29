@@ -15,12 +15,32 @@ from datacenter.models import Schoolkid
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
-
-PUPILS_NAME = 'Фролов Иван'
+PUPILS_NAME = 'Анна'
+#PUPILS_NAME = 'Фролов Иван'
 STUDY_SUBJECT = 'Литература'
 
 
-def create_commendation(schoolkid_name, subject):
+def school_kid_search(schoolkid_name):
+    schoolkid_queryset = Schoolkid.objects.filter \
+        (full_name__contains=schoolkid_name)
+    try:
+        schoolkid = Schoolkid.objects.get \
+            (full_name__contains=schoolkid_name)
+    except MultipleObjectsReturned:
+        logging.info(f'Нашел учеников с именем {schoolkid_name}: '
+                     f'{len(schoolkid_queryset)}. Запустите программу '
+                     f'повторно, указав уникальное имя ученика.')
+        return
+    except ObjectDoesNotExist:
+        logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
+                     f'Запустите программу повторно, указав корректное имя '
+                     f'ученика.')
+        return
+    print(schoolkid)
+    return schoolkid
+
+
+def create_commendation(schoolkid, subject):
     commendations = [
         'Молодец!',
         'Ты меня приятно удивил!',
@@ -40,19 +60,7 @@ def create_commendation(schoolkid_name, subject):
         'Ты многое сделал, я это вижу!'
     ]
     commendation = random.choice(commendations)
-    schoolkid_queryset = Schoolkid.objects.filter\
-        (full_name__contains=schoolkid_name)
-    try:
-        schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
-    except MultipleObjectsReturned:
-        logging.info(f'Нашел учеников с именем {schoolkid_name}: '
-              f'{len(schoolkid_queryset)}. Нужно указать уникальное имя '
-                     f'ученика для выполнения сценария.')
-        return
-    except ObjectDoesNotExist:
-        logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
-              f'Не могу продолжить выполнение сценария.')
-        return
+
     subject_lessons = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter, subject__title=subject)
@@ -86,7 +94,8 @@ def remove_chastisements(schoolkid_name):
 
 def main():
     logging.basicConfig(format='{message}', level=logging.INFO, style='{')
-    return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
+    return school_kid_search(PUPILS_NAME)
+    # return create_commendation(PUPILS_NAME, STUDY_SUBJECT)
 
 
 if __name__ == '__main__':
