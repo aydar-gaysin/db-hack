@@ -116,32 +116,27 @@ def remove_chastisements(schoolkid_name):
 
 
 def create_parser():
-    parser = argparse.ArgumentParser(description='Скрипт работает с '
-                                                 'базой электронного '
-                                                 'дневника. При '
-                                                 'указании фамилии и '
-                                                 'имени ученика:\n'
-                                                 '1) меняет оценки "2" и "3"'
-                                                 'на "5";\n 2) удаляет '
-                                                 'замечания к ученику.\n При '
-                                                 'указании названия предмета '
-                                                 '(опционально), добавляет '
-                                                 'похвалу ученика, выбрав '
-                                                 'дату урока случайным '
-                                                 'образом.')
+    parser = argparse.ArgumentParser(
+        description='Скрипт работает с базой электронного дневника. При'
+                    'указании фамилии и имени ученика: 1) меняет оценки "2" и'
+                    ' "3" на "5"; 2) удаляет замечания к ученику. При '
+                    'указании названия предмета (опционально), добавляет '
+                    'похвалу ученика, выбрав дату урока случайным образом.')
 
-    parser.add_argument('pupil_surname',
-                        type=str, help='Укажите фамилию ученика на '
-                                       'кириллице')
-    parser.add_argument('pupil_name',
-                        type=str, help='Укажите имя ученика на '
-                                       'кириллице')
-    parser.add_argument('-p', '--pupil_patronymic',
-                        type=str, help='Укажите отчество ученика на '
-                                       'кириллице')
-    parser.add_argument('-s', '--subject',
-                        type=str, help='Укажите название школьного предмета '
-                                       'на кириллице')
+    parser.add_argument(
+        'pupil_surname', type=str, help='Укажите фамилию ученика на кириллице'
+    )
+    parser.add_argument(
+        'pupil_name', type=str, help='Укажите имя ученика на кириллице'
+    )
+    parser.add_argument(
+        '-p', '--pupil_patronymic', type=str, help='Укажите отчество ученика '
+                                                   'на кириллице'
+    )
+    parser.add_argument(
+        '-s', '--subject', type=str, help='Укажите название школьного '
+                                          'предмета на кириллице'
+    )
     return parser
 
 
