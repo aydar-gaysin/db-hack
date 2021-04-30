@@ -157,7 +157,7 @@ def main():
         schoolkid_patronymic = ''
     fullname = f'{schoolkid_surname} {schoolkid_name} {schoolkid_patronymic}'
     schoolkid = school_kid_search(fullname)
-    print('------------------------------------------------------------------')
+    logging.info('-----------------------------------------------------------')
     if schoolkid:
         fix_marks(schoolkid.full_name)
         remove_chastisements(schoolkid.full_name)
@@ -167,7 +167,7 @@ def main():
         study_subject = study_subject_search(schoolkid, subject)
         if study_subject:
             create_commendation(schoolkid, study_subject)
-    print('------------------------------------------------------------------')
+    logging.info('-----------------------------------------------------------')
 
 
 if __name__ == '__main__':
