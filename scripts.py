@@ -16,10 +16,6 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
 
-PUPILS_NAME = 'Нина Костина'
-STUDY_SUBJECT = 'Литература'
-
-
 def school_kid_search(schoolkid_name):
     if not schoolkid_name:
         logging.info(f'Ошибка! Не введено имя ученика. Запустите программу'
@@ -127,7 +123,7 @@ def create_parser():
                                                  'имени ученика:\n'
                                                  '1) меняет оценки "2" и "3"'
                                                  'на "5";\n 2) удаляет '
-                                                 'замечания к ученику.\n При'
+                                                 'замечания к ученику.\n При '
                                                  'указании названия предмета '
                                                  '(опционально), добавляет '
                                                  'похвалу ученика, выбрав '
@@ -138,7 +134,7 @@ def create_parser():
                         type=str, help='Укажите фамилию ученика на '
                                        'кириллице')
     parser.add_argument('pupil_name',
-                        type=str, help='Укажите фамилию ученика на '
+                        type=str, help='Укажите имя ученика на '
                                        'кириллице')
     parser.add_argument('-p', '--pupil_patronymic',
                         type=str, help='Укажите отчество ученика на '
