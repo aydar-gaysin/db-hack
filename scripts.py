@@ -24,19 +24,17 @@ def search_school_kid(schoolkid_name):
     try:
         schoolkid = Schoolkid.objects.get \
             (full_name__contains=schoolkid_name)
+        return schoolkid
     except MultipleObjectsReturned:
         schoolkid_queryset = Schoolkid.objects.filter \
             (full_name__contains=schoolkid_name)
         logging.info(f'Нашел учеников с именем {schoolkid_name}: '
                      f'{len(schoolkid_queryset)}.\nЗапустите программу '
                      f'повторно, указав уникальное имя ученика.')
-        return None
     except ObjectDoesNotExist:
         logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
                      f'Запустите программу повторно, указав корректное имя '
                      f'ученика.')
-        return None
-    return schoolkid
 
 
 def search_study_subject(schoolkid, subject):
@@ -85,7 +83,7 @@ def create_commendation(schoolkid, subject):
     pick_lesson = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
-        subject__title=subject)[random.randint(0, lessons_quantity)]
+        subject__title=subject).order_by('?').first
     Commendation.objects.create(text=commendation,
                                 created=pick_lesson.date, schoolkid=schoolkid,
                                 subject=pick_lesson.subject,
@@ -96,7 +94,7 @@ def create_commendation(schoolkid, subject):
 
 
 def fix_marks(schoolkid_name):
-    schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
+    schoolkid = search_school_kid(schoolkid_name)
     bad_points = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
     bad_points_quantity = bad_points.count()
     logging.info(f'Найдено {bad_points_quantity} плохих оценок.')
@@ -109,7 +107,7 @@ def fix_marks(schoolkid_name):
 
 
 def remove_chastisements(schoolkid_name):
-    schoolkid = Schoolkid.objects.get(full_name__contains=schoolkid_name)
+    schoolkid = search_school_kid(schoolkid_name)
     pupil_chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
     pupil_chastisements.delete()
     logging.info(f'Все замечания для {schoolkid} успешно удалены.')
