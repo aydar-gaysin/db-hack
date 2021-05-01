@@ -16,7 +16,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.exceptions import ObjectDoesNotExist
 
 
-def school_kid_search(schoolkid_name):
+def search_school_kid(schoolkid_name):
     if not schoolkid_name:
         logging.info(f'Ошибка! Не введено имя ученика. Запустите программу'
                      f'повторно, указав уникальное имя ученика.')
@@ -39,7 +39,7 @@ def school_kid_search(schoolkid_name):
     return schoolkid
 
 
-def study_subject_search(schoolkid, subject):
+def search_study_subject(schoolkid, subject):
     if not schoolkid:
         logging.info(f'Не могу найти предмет, не зная точного имени ученика!')
         return
@@ -151,7 +151,7 @@ def main():
     if not schoolkid_patronymic:
         schoolkid_patronymic = ''
     fullname = f'{schoolkid_surname} {schoolkid_name} {schoolkid_patronymic}'
-    schoolkid = school_kid_search(fullname)
+    schoolkid = search_school_kid(fullname)
     logging.info('-----------------------------------------------------------')
     if schoolkid:
         fix_marks(schoolkid.full_name)
@@ -159,7 +159,7 @@ def main():
 
     if args.subject:
         subject = args.subject
-        study_subject = study_subject_search(schoolkid, subject)
+        study_subject = search_study_subject(schoolkid, subject)
         if study_subject:
             create_commendation(schoolkid, study_subject)
     logging.info('-----------------------------------------------------------')
