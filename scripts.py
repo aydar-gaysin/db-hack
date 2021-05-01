@@ -12,8 +12,6 @@ from datacenter.models import Commendation
 from datacenter.models import Lesson
 from datacenter.models import Mark
 from datacenter.models import Schoolkid
-from django.core.exceptions import MultipleObjectsReturned
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def search_school_kid(schoolkid_name):
@@ -25,13 +23,13 @@ def search_school_kid(schoolkid_name):
         schoolkid = Schoolkid.objects.get \
             (full_name__contains=schoolkid_name)
         return schoolkid
-    except MultipleObjectsReturned:
+    except Schoolkid.MultipleObjectsReturned:
         schoolkid_queryset = Schoolkid.objects.filter \
             (full_name__contains=schoolkid_name)
         logging.info(f'Нашел учеников с именем {schoolkid_name}: '
                      f'{len(schoolkid_queryset)}.\nЗапустите программу '
                      f'повторно, указав уникальное имя ученика.')
-    except ObjectDoesNotExist:
+    except Schoolkid.DoesNotExist:
         logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
                      f'Запустите программу повторно, указав корректное имя '
                      f'ученика.')
@@ -45,9 +43,9 @@ def search_study_subject(schoolkid, subject):
         subject_lessons = Lesson.objects.get(
             year_of_study=schoolkid.year_of_study,
             group_letter=schoolkid.group_letter, subject__title=subject)
-    except MultipleObjectsReturned:
+    except Lesson.MultipleObjectsReturned:
         logging.debug(f'Предмет "{subject}" найден в базе.')
-    except ObjectDoesNotExist:
+    except Lesson.DoesNotExist:
         logging.info(f'Не нашел предмет с названием "{subject}". '
                      f'Запустите программу повторно, указав корректное '
                      f'название предмета.')
@@ -76,14 +74,11 @@ def create_commendation(schoolkid, subject):
     ]
     commendation = random.choice(commendations)
 
-    subject_lessons = Lesson.objects.filter(
-        year_of_study=schoolkid.year_of_study,
-        group_letter=schoolkid.group_letter, subject__title=subject)
-    lessons_quantity = len(subject_lessons)
     pick_lesson = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
-        subject__title=subject).order_by('?').first
+        subject__title=subject).order_by('?').first()
+    print(pick_lesson)
     Commendation.objects.create(text=commendation,
                                 created=pick_lesson.date, schoolkid=schoolkid,
                                 subject=pick_lesson.subject,
