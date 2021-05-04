@@ -95,15 +95,17 @@ def fix_marks(schoolkid_name):
     logging.info(f'Найдено {bad_points_quantity} плохих оценок.')
     if not bad_points_quantity:
         return
-    bad_points.update(points=5)
-    logging.info(f'Все плохие оценки исправлены.')
+    correct_points = bad_points.update(points=5)
+    logging.info(f'{correct_points} плохих оценок исправлено.')
 
 
 def remove_chastisements(schoolkid_name):
     schoolkid = search_school_kid(schoolkid_name)
     pupil_chastisements = Chastisement.objects.filter(schoolkid=schoolkid)
-    pupil_chastisements.delete()
-    logging.info(f'Все замечания для {schoolkid} успешно удалены.')
+    deleted_chastisements = pupil_chastisements.delete()
+    logging.info(
+        f'{deleted_chastisements[0]} замечаний для {schoolkid} успешно '
+        f'удалены.')
 
 
 def create_parser():
