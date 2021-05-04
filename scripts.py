@@ -95,9 +95,7 @@ def fix_marks(schoolkid_name):
     logging.info(f'Найдено {bad_points_quantity} плохих оценок.')
     if not bad_points_quantity:
         return
-    for bad_point in bad_points:
-        bad_point.points = 5
-        bad_point.save()
+    bad_points.update(points=5)
     logging.info(f'Все плохие оценки исправлены.')
 
 
