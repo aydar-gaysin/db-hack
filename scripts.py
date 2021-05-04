@@ -27,7 +27,7 @@ def search_school_kid(schoolkid_name):
         schoolkid_queryset = Schoolkid.objects.filter \
             (full_name__contains=schoolkid_name)
         logging.info(f'Нашел учеников с именем {schoolkid_name}: '
-                     f'{len(schoolkid_queryset)}.\nЗапустите программу '
+                     f'{schoolkid_queryset.count()}.\nЗапустите программу '
                      f'повторно, указав уникальное имя ученика.')
     except Schoolkid.DoesNotExist:
         logging.info(f'Не нашел учеников с именем {schoolkid_name}. '
@@ -78,7 +78,6 @@ def create_commendation(schoolkid, subject):
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
         subject__title=subject).order_by('?').first()
-    print(pick_lesson)
     Commendation.objects.create(text=commendation,
                                 created=pick_lesson.date, schoolkid=schoolkid,
                                 subject=pick_lesson.subject,
