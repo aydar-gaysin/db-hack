@@ -39,18 +39,14 @@ def search_study_subject(schoolkid, subject):
     if not schoolkid:
         logging.info(f'Не могу найти предмет, не зная точного имени ученика!')
         return
-    try:
-        subject_lessons = Lesson.objects.get(
+    subject_lessons = Lesson.objects.filter(
             year_of_study=schoolkid.year_of_study,
-            group_letter=schoolkid.group_letter, subject__title=subject)
-    except Lesson.MultipleObjectsReturned:
-        logging.debug(f'Предмет "{subject}" найден в базе.')
-    except Lesson.DoesNotExist:
-        logging.info(f'Не нашел предмет с названием "{subject}". '
-                     f'Запустите программу повторно, указав корректное '
-                     f'название предмета.')
-        return
-    return subject
+            group_letter=schoolkid.group_letter,
+            subject__title=subject).exists()
+    if subject_lessons:
+        return subject
+    else:
+        logging.info(f'Предмет с названием "{subject}" не найден.')
 
 
 def create_commendation(schoolkid, subject):
